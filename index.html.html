@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>ABC Blinds & Awnings – Virtual Assistant</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f4f6f8; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 1rem; }
+  .chat-wrap { width: 440px; border-radius: 18px; overflow: hidden; background: #fff; display: flex; flex-direction: column; height: 620px; box-shadow: 0 6px 32px rgba(0,0,0,0.13); }
+
+  /* Header */
+  .chat-header { background: #c0392b; padding: 15px 18px; display: flex; align-items: center; gap: 12px; }
+  .header-logo { background: #fff; border-radius: 10px; padding: 5px 9px; font-size: 13px; font-weight: 700; color: #c0392b; letter-spacing: 0.5px; flex-shrink: 0; }
+  .header-info { flex: 1; }
+  .header-name { color: #fff; font-size: 15px; font-weight: 600; }
+  .header-status { color: #f5b7b1; font-size: 12px; display: flex; align-items: center; gap: 5px; margin-top: 2px; }
+  .status-dot { width: 7px; height: 7px; border-radius: 50%; background: #7FD4A0; flex-shrink: 0; }
+  .header-phone { color: #fff; font-size: 12px; font-weight: 500; background: rgba(255,255,255,0.18); padding: 4px 10px; border-radius: 12px; text-decoration: none; white-space: nowrap; }
+  .header-phone:hover { background: rgba(255,255,255,0.28); }
+
+  /* Messages */
+  .chat-messages { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 10px; background: #fafafa; }
+  .msg { max-width: 84%; padding: 10px 14px; border-radius: 16px; font-size: 14px; line-height: 1.55; }
+  .msg.bot { background: #fff; color: #1a1a1a; border-bottom-left-radius: 4px; align-self: flex-start; box-shadow: 0 1px 4px rgba(0,0,0,0.09); }
+  .msg.user { background: #c0392b; color: #fff; border-bottom-right-radius: 4px; align-self: flex-end; }
+  .msg.typing { background: #fff; color: #999; font-size: 13px; border-bottom-left-radius: 4px; align-self: flex-start; box-shadow: 0 1px 4px rgba(0,0,0,0.09); }
+
+  /* Quick buttons */
+  .quick-wrap { padding: 6px 14px 8px; background: #fafafa; }
+  .quick-label { font-size: 11px; color: #aaa; margin-bottom: 5px; }
+  .quick-btns { display: flex; flex-wrap: wrap; gap: 6px; }
+  .qbtn { font-size: 12px; padding: 5px 11px; border: 1px solid #c0392b; color: #c0392b; background: #fff; border-radius: 14px; cursor: pointer; transition: background 0.15s; white-space: nowrap; }
+  .qbtn:hover { background: #fdf2f1; }
+
+  /* Input */
+  .chat-input-row { display: flex; gap: 8px; padding: 11px 13px; border-top: 1px solid #eee; background: #fff; }
+  .chat-input-row input { flex: 1; border: 1px solid #ddd; border-radius: 22px; padding: 9px 16px; font-size: 14px; background: #fafafa; color: #1a1a1a; outline: none; transition: border-color 0.15s; }
+  .chat-input-row input:focus { border-color: #c0392b; background: #fff; }
+  .send-btn { background: #c0392b; color: #fff; border: none; border-radius: 50%; width: 38px; height: 38px; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: background 0.15s; }
+  .send-btn:hover { background: #a93226; }
+  .send-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  /* Footer */
+  .chat-footer { text-align: center; font-size: 11px; color: #bbb; padding: 6px; background: #fff; }
+  .chat-footer a { color: #c0392b; text-decoration: none; }
+</style>
+</head>
+<body>
+
+<div class="chat-wrap">
+
+  <div class="chat-header">
+    <div class="header-logo">ABC</div>
+    <div class="header-info">
+      <div class="header-name">ABC Blinds & Awnings</div>
+      <div class="header-status"><span class="status-dot"></span> Virtual Assistant — online now</div>
+    </div>
+    <a class="header-phone" href="tel:131315">📞 13 13 15</a>
+  </div>
+
+  <div class="chat-messages" id="messages"></div>
+
+  <div class="quick-wrap" id="quickwrap">
+    <div class="quick-label">Quick questions</div>
+    <div class="quick-btns">
+      <button class="qbtn" onclick="quickSend('What blinds do you have?')">Products</button>
+      <button class="qbtn" onclick="quickSend('Can I get a free measure and quote?')">Free quote</button>
+      <button class="qbtn" onclick="quickSend('Where are your showrooms?')">Showrooms</button>
+      <button class="qbtn" onclick="quickSend('Do you do motorised blinds?')">Motorised</button>
+      <button class="qbtn" onclick="quickSend('What is your warranty?')">Warranty</button>
+      <button class="qbtn" onclick="quickSend('Do you offer interest free?')">Interest free</button>
+    </div>
+  </div>
+
+  <div class="chat-input-row">
+    <input type="text" id="userInput" placeholder="Ask me anything about our products..." onkeydown="if(event.key==='Enter')sendMsg()" />
+    <button class="send-btn" onclick="sendMsg()" id="sendBtn">&#10148;</button>
+  </div>
+
+  <div class="chat-footer">
+    Powered by AI · <a href="https://www.abcblinds.com.au/booking" target="_blank">Book a free measure & quote</a>
+  </div>
+
+</div>
+
+<script>
+const SYSTEM = `You are a friendly, knowledgeable virtual assistant for ABC Blinds & Awnings, Perth's leading blinds and window furnishings company. You speak in a warm, helpful, and professional tone — like a helpful team member in their showroom, not a stiff corporate chatbot.
+
+COMPANY FACTS:
+- Name: ABC Blinds & Awnings
+- Phone: 13 13 15
+- Website: abcblinds.com.au
+- Rating: 4.8 stars with 3,000+ reviews on ProductReview.com.au and Google
+- Experience: 50+ years in the Perth blinds industry
+- WA-owned and operated
+- Products made locally in their Perth factory
+- Price beat guarantee: they will beat any competitor's price by 5%
+- Interest free finance available
+- Free Measure & Quote — no obligation, book at abcblinds.com.au/booking
+- 2-year warranty on all products
+- 7-day installation available on select blinds
+
+PRODUCTS:
+Indoor Blinds:
+- Roller Blinds — economical, minimal look, very popular
+- Double Roller / Aero Blinds — two blinds in one unit (blockout + sheer)
+- Cellular / Honeycomb Blinds — insulating, great for energy efficiency
+- Roman Blinds — timeless fabric blinds that fold up
+- Panel Blinds — modern, great for large windows and sliding doors
+- Vertical Blinds — practical, popular for sliding doors
+- Vision Blinds — modern dual-fabric blind with striking look
+- Aluminium Venetian Blinds — premium, affordable
+- Timber Venetian Blinds — natural timber look, durable
+- Timber-look Venetian Blinds — appearance of timber, lower price point
+
+Designer Range:
+- Vertisheers — contemporary vertical with sheer fabric
+- Tripleshade — Venetian look in soft fabric
+- Tricoshade — superior UV protection
+- Ares Blinds — stylish, modern design
+
+Shutters:
+- Indoor Plantation Shutters — premium, long-lasting investment, gorgeous look
+
+Curtains:
+- Sheer Curtains — soft light, elegant
+- Full range of fabrics and styles available
+
+Outdoor:
+- Outdoor Blinds and Awnings — full range for patios, pergolas, and commercial spaces
+
+Other Products:
+- Crimsafe Security Doors & Windows — Australian-made security screens
+- Motorised Blinds — smart home compatible, available on most product ranges
+- Commercial blinds — for offices, apartments, retail and commercial spaces
+
+SHOWROOMS (all Mon–Sat 9am–5pm unless noted):
+- Cannington
+- Wangara
+- Osborne Park
+- Mandurah
+- Rockingham (Mon–Fri 9am–5pm, Sat 9am–1pm)
+- Bunbury (Mon–Fri 9am–5pm, Sat 8am–1pm)
+
+HOW IT WORKS (4-step process):
+1. Selection — browse online or visit a showroom
+2. Free Quote — consultant visits your home to measure and quote, no obligation
+3. Production — custom made in their Perth factory
+4. Installation — professional installation by their team
+
+YOUR BEHAVIOUR:
+- Keep replies SHORT and conversational — 2 to 4 sentences max unless listing products
+- If someone asks about price, say that pricing depends on size, fabric, and product — a free in-home quote is the best way to get an accurate price. Do not make up specific prices.
+- If someone wants to book, direct them to abcblinds.com.au/booking or call 13 13 15
+- If someone mentions a showroom visit, share the relevant showroom hours
+- If unsure about something specific, suggest they call 13 13 15 or book a free consultation
+- Never make up information not in this prompt`;
+
+const msgs = [];
+
+function addMsg(role, text) {
+  const el = document.createElement('div');
+  el.className = 'msg ' + (role === 'user' ? 'user' : 'bot');
+  el.textContent = text;
+  document.getElementById('messages').appendChild(el);
+  document.getElementById('messages').scrollTop = 99999;
+}
+
+function showTyping() {
+  const el = document.createElement('div');
+  el.className = 'msg typing';
+  el.id = 'typing-indicator';
+  el.textContent = 'Typing...';
+  document.getElementById('messages').appendChild(el);
+  document.getElementById('messages').scrollTop = 99999;
+}
+
+function removeTyping() {
+  const t = document.getElementById('typing-indicator');
+  if (t) t.remove();
+}
+
+async function callClaude(userMsg) {
+  msgs.push({ role: 'user', content: userMsg });
+  showTyping();
+  document.getElementById('sendBtn').disabled = true;
+  document.getElementById('userInput').disabled = true;
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        system: SYSTEM,
+        messages: msgs
+      })
+    });
+    const data = await res.json();
+    const reply = data.content[0].text;
+    msgs.push({ role: 'assistant', content: reply });
+    removeTyping();
+    addMsg('bot', reply);
+  } catch(e) {
+    removeTyping();
+    addMsg('bot', 'Sorry, something went wrong. Please call us directly on 13 13 15 and we\'ll be happy to help!');
+  }
+
+  document.getElementById('sendBtn').disabled = false;
+  document.getElementById('userInput').disabled = false;
+  document.getElementById('userInput').focus();
+}
+
+function sendMsg() {
+  const input = document.getElementById('userInput');
+  const text = input.value.trim();
+  if (!text) return;
+  input.value = '';
+  document.getElementById('quickwrap').style.display = 'none';
+  addMsg('user', text);
+  callClaude(text);
+}
+
+function quickSend(text) {
+  document.getElementById('quickwrap').style.display = 'none';
+  addMsg('user', text);
+  callClaude(text);
+}
+
+addMsg('bot', "Hi there! Welcome to ABC Blinds & Awnings 👋 I'm your virtual assistant. Whether you're looking for the perfect blinds, want to book a free measure and quote, or just have a question — I'm here to help. What can I do for you today?");
+</script>
+
+</body>
+</html>
